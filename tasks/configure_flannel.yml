@@ -1,4 +1,21 @@
 ---
+- name: Configure etcd port in Firewall
+  firewalld:
+    zone: internal
+    port: 2379-2380/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: Add nodes and master to internal group
+  firewalld:
+    zone: internal
+    source: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items: "{{ groups['k8s-nodes'] + groups['k8s-master'] }}"
+
 - name: Configure Docker to use registry cache
   lineinfile:
     dest: /etc/sysconfig/docker
@@ -9,14 +26,14 @@
 - name: Overlay | configure etcd url
   lineinfile:
     dest: /etc/sysconfig/flanneld
-    line: FLANNEL_ETCD="http://{{ hostvars[groups['k8s-master'][0]]['ansible_default_ipv4']['address'] }}:2379"
-    regexp: "^FLANNEL_ETCD="
+    line: FLANNEL_ETCD_ENDPOINTS="http://{{ hostvars[groups['k8s-master'][0]]['ansible_default_ipv4']['address'] }}:2379"
+    regexp: "^FLANNEL_ETCD_ENDPOINTS="
 
 - name: Overlay | configure etcd config key
   lineinfile:
     dest: /etc/sysconfig/flanneld
-    line: FLANNEL_ETCD_KEY="/atomic01/network"
-    regexp: "^FLANNEL_ETCD_KEY="
+    line: FLANNEL_ETCD_PREFIX="/atomic01/network"
+    regexp: "^FLANNEL_ETCD_PREFIX="
 
 - name: Flannel systemd | create service.d
   file:

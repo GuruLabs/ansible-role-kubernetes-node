@@ -1,8 +1,24 @@
 ---
-- name: Configure etcd port in Firewall
+- name: Configure flannel port in Firewall for UDP backend
   firewalld:
     zone: internal
-    port: 2379-2380/tcp
+    port: 8285/UDP
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: Configure master node check port
+  firewalld:
+    zone: internal
+    port: 10250/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: Configure Application access ports
+  firewalld:
+    zone: public
+    port: 30000-32767/tcp
     permanent: yes
     state: enabled
     immediate: yes

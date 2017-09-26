@@ -2,7 +2,7 @@
 - name: Configure flannel port in Firewall for UDP backend
   firewalld:
     zone: internal
-    port: 8285/UDP
+    port: 8285/udp
     permanent: yes
     state: enabled
     immediate: yes
